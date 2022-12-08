@@ -1,15 +1,15 @@
 {
-  "name": "inventory-connector",
+  "name": "example-connector",
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "topic.prefix": "database",
     "tasks.max": "1",
     "database.hostname": "postgres",
     "database.port": "5432",
-    "database.user": "postgres_user",
-    "database.password": "postgres_password",
+    "database.user": "postgres",
+    "database.password": "postgres",
     "database.dbname": "postgres",
-    "plugin.name": "pgoutput",
-    "topic.prefix": "postgres_database",
-    "schema.include.list": "inventory"
+    "schema.include.list": "example",
+    "plugin.name": "pgoutput"
   }
 }

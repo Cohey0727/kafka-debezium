@@ -3,31 +3,50 @@ version: "3.9"
 services:
   # Zookeeper
   zookeeper:
-    image: "bitnami/zookeeper:3.8.0"
+    image: "debezium/zookeeper:2.0"
     container_name: zookeeper
     ports:
       - 2181:2181
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-
+      - 2888:2888
+      - 3888:3888
+    
   # Kafka Broker
   kafka:
-    image: "bitnami/kafka:3.3.1"
+    image: debezium/kafka:2.0
     container_name: kafka
     ports:
       - 9092:9092
-      - 9093:9093
-      - 9094:9094
-    environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT,EXTERNAL_DOCKER:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093,EXTERNAL_DOCKER://:9094
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093,EXTERNAL_DOCKER://host.docker.internal:9094
-      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
-    depends_on:
+    links:
       - zookeeper
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+
+  # Debezium
+  debezium:
+    image: debezium/connect:2.0
+    container_name: debezium
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - 8083:8083
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+
+  # Postgres
+  postgres:
+    image: postgres:13.9
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    command: postgres -c wal_level=logical
 
   # Kafka UI
   kafka-ui:
@@ -44,40 +63,14 @@ services:
       - KAFKA_CLUSTERS_0_ZOOKEEPER=2181
       - KAFKA_CLUSTERS_0_READONLY=false
 
-  # Debezium
-  debezium:
-    image: debezium/connect:2.0
-    container_name: debezium
+
+  # Debezium UI
+  debezium-ui:
+    image: debezium/debezium-ui:2.0
+    container_name: debezium-ui
     depends_on:
-      - postgres
+      - debezium
     ports:
-      - 8083:8083
+      - 18082:8080
     environment:
-      - BOOTSTRAP_SERVERS=kafka:9092
-      - GROUP_ID=1
-      - CONFIG_STORAGE_TOPIC=my_connect_configs
-      - OFFSET_STORAGE_TOPIC=my_connect_offsets
-      - STATUS_STORAGE_TOPIC=my_connect_statuses
-
-  # ポンコツなので、Kafka UIは廃止する
-  # # Debezium UI
-  # debezium-ui:
-  #   image: debezium/debezium-ui:2.0
-  #   container_name: debezium-ui
-  #   depends_on:
-  #     - debezium
-  #   ports:
-  #     - 18082:8080
-  #   environment:
-  #     - KAFKA_CONNECT_URIS=http://debezium:8083
-
-  # Postgres
-  postgres:
-    image: postgres:13.9
-    container_name: postgres
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=postgres_user
-      - POSTGRES_PASSWORD=postgres_password
-    command: postgres -c wal_level=logical
+      - KAFKA_CONNECT_URIS=http://debezium:8083
