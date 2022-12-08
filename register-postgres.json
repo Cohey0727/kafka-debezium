@@ -10,6 +10,10 @@
     "database.password": "postgres",
     "database.dbname": "postgres",
     "schema.include.list": "example",
-    "plugin.name": "pgoutput"
+    "plugin.name": "pgoutput",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false
   }
 }
