@@ -74,14 +74,13 @@ services:
     environment:
       - KAFKA_CONNECT_URIS=http://debezium:8083
 
-  # # Consumer
-  # consumer:
+  # # Consumer Node
+  # consumer-node:
   #   build:
-  #     context: ./consumer
-  #   container_name: node-consumer
+  #     context: ./consumer-node
+  #   container_name: consumer-node
   #   depends_on:
   #     - kafka
   #     - debezium
   #   env_file:
-  #     - consumer/.env
-  #   command: npm start
+  #     - consumer-node/.env
