@@ -1,10 +1,10 @@
 FROM node:19.2.0
 
-WORKDIR /usr/src/app
+WORKDIR /opt/app
 
 COPY package.json ./
 RUN npm install
 
-COPY index.ts ./
+COPY src ./
 
-CMD [ "npm", "start" ]
+CMD [ "npm", "run", "dev" ]

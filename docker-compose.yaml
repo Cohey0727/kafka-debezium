@@ -76,6 +76,8 @@ services:
 
   # Consumer Node
   consumer-node:
+    volumes:
+      - ./consumer-node:/opt/app
     build:
       context: ./consumer-node
     container_name: consumer-node
@@ -84,4 +86,4 @@ services:
       - debezium
     env_file:
       - consumer-node/.env
-    tty: true
+    command: npm run dev

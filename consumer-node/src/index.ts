@@ -1,6 +1,5 @@
 import { Kafka } from "kafkajs";
 import * as dotenv from "dotenv";
-import kafkaNode from "kafka-node";
 
 dotenv.config();
 
@@ -33,21 +32,31 @@ const run = async () => {
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
-      console.log({ topic, partition, message });
+      const value = message.value?.toString("utf-8");
+      if (!value) {
+        console.warn("No value");
+        return;
+      }
+      const json = JSON.parse(value);
+      const afterData = json.after;
+      if (!afterData) {
+        console.warn("No after data");
+        return;
+      }
+      console.log({ afterData });
     },
   });
 };
 
 run().catch(console.error);
 
-const showInfo = async () => {
-  const admin = kafka.admin();
-  await admin.connect();
-  const topics = await admin.listTopics();
-  console.log({ topics });
-};
-
-showInfo().catch(console.error);
+// const showInfo = async () => {
+//   const admin = kafka.admin();
+//   await admin.connect();
+//   const topics = await admin.listTopics();
+//   console.log({ topics });
+// };
+// showInfo().catch(console.error);
 
 /**
  * kafkajs producer
@@ -62,26 +71,3 @@ showInfo().catch(console.error);
 // };
 
 // sendMessage().catch(console.error);
-
-/**
- * kafka-node
- */
-// const Consumer = kafkaNode.Consumer;
-// const client = new kafkaNode.KafkaClient({ kafkaHost: settings.kafkaBrokers[0] });
-// const consumer = new Consumer(client, [{ topic: settings.kafkaTopicName }], {
-//   groupId: settings.kafkaGroupId,
-//   autoCommit: true,
-//   fromOffset: true,
-// });
-
-// consumer.on("message", (message) => {
-//   console.log({ message });
-// });
-
-// consumer.on("error", function (error) {
-//   console.log({ error });
-// });
-
-// consumer.on("message", (message) => {
-//   console.log({ message });
-// });
