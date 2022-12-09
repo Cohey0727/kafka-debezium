@@ -26,7 +26,7 @@ services:
     image: quay.io/debezium/kafka:2.0
     container_name: kafka
     ports:
-      - 9092:9092
+      - 29092:9092
     depends_on:
       - zookeeper
     environment:
@@ -74,13 +74,14 @@ services:
     environment:
       - KAFKA_CONNECT_URIS=http://debezium:8083
 
-  # # Consumer Node
-  # consumer-node:
-  #   build:
-  #     context: ./consumer-node
-  #   container_name: consumer-node
-  #   depends_on:
-  #     - kafka
-  #     - debezium
-  #   env_file:
-  #     - consumer-node/.env
+  # Consumer Node
+  consumer-node:
+    build:
+      context: ./consumer-node
+    container_name: consumer-node
+    depends_on:
+      - kafka
+      - debezium
+    env_file:
+      - consumer-node/.env
+    tty: true

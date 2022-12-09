@@ -40,6 +40,29 @@ const run = async () => {
 
 run().catch(console.error);
 
+const showInfo = async () => {
+  const admin = kafka.admin();
+  await admin.connect();
+  const topics = await admin.listTopics();
+  console.log({ topics });
+};
+
+showInfo().catch(console.error);
+
+/**
+ * kafkajs producer
+ */
+// const sendMessage = async () => {
+//   const producer = kafka.producer();
+//   await producer.connect();
+//   await producer.send({
+//     topic: settings.kafkaTopicName,
+//     messages: [{ value: "Hello KafkaJS user!" }],
+//   });
+// };
+
+// sendMessage().catch(console.error);
+
 /**
  * kafka-node
  */
